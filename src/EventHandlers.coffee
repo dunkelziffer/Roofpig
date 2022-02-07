@@ -196,7 +196,8 @@ class EventHandlers
   numpad_7 = 103
   numpad_8 = 104
   numpad_9 = 105
-  
+  numpad_decimal = 110
+
   key_question = 191
 
 
@@ -204,26 +205,26 @@ class EventHandlers
   # TODO: extract into a config option
 
   # cube rotations
-  rotate_B = key_S
-  rotate_D = key_C
-  rotate_F = key_X
-  rotate_L = key_A
-  rotate_R = key_D
-  rotate_U = key_Z
+  rotate_B = null
+  rotate_D = null
+  rotate_F = null
+  rotate_L = null
+  rotate_R = null
+  rotate_U = null
 
   # face turns
-  turn_B = null
-  turn_D = null
-  turn_F = key_K
-  turn_L = null
-  turn_R = key_L
-  turn_U = key_J
+  turn_B = numpad_7
+  turn_D = numpad_0
+  turn_F = numpad_5
+  turn_L = numpad_4
+  turn_R = numpad_6
+  turn_U = numpad_8
 
   # menu buttons
-  menu_reset = key_home
-  menu_prev = key_left_arrow
-  menu_next = key_right_arrow
-  menu_play = key_space
+  menu_reset = numpad_decimal
+  menu_prev = numpad_1
+  menu_next = numpad_2
+  menu_play = numpad_3
 
 
   # keybindings will be deactivated automatically, if you assign `null` to them in the mapping above
