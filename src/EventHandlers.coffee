@@ -4,6 +4,7 @@
 #This is all page wide data and functions.
 class EventHandlers
   @initialized = false
+  @shifted = false
 
   @set_focus: (new_focus) ->
     if @_focus != new_focus
@@ -75,12 +76,21 @@ class EventHandlers
   @key_down: (e) ->
     return if @focus().is_null
 
+    if e.keyCode == 16
+      if @shifted
+        @shifted = false
+      else
+        @shifted = true
+      return
+
+    console.log(e.keyCode, e.shiftKey, e.altKey, e.metaKey, e.ctrlKey)
+
     help_toggled = @dom.remove_help()
 
     if e.ctrlKey || e.metaKey
       return true
 
-    [key, shift, alt] = [e.keyCode, e.shiftKey, e.altKey]
+    [key, shift, alt] = [e.keyCode, e.shiftKey || @shifted, e.altKey]
 
     if key in turn_keys
       turns = if shift then 3 else if alt then 2 else 1
@@ -197,6 +207,7 @@ class EventHandlers
   numpad_8 = 104
   numpad_9 = 105
   numpad_decimal = 110
+  numpad_divide = 111
 
   key_question = 191
 
@@ -209,11 +220,11 @@ class EventHandlers
   rotate_D = null
   rotate_F = null
   rotate_L = null
-  rotate_R = null
-  rotate_U = null
+  rotate_R = numpad_7
+  rotate_U = numpad_divide
 
   # face turns
-  turn_B = numpad_7
+  turn_B = numpad_9
   turn_D = numpad_0
   turn_F = numpad_5
   turn_L = numpad_4
