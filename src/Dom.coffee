@@ -1,9 +1,9 @@
 class Dom
 
   constructor: (@cube_id, @div, renderer, make_alg_area, showalg, user_controlled) ->
-    @div.css(position:'relative', 'font-family':'"Lucida Sans Unicode", "Lucida Grande", sans-serif')
-    this.has_focus(false)
+    # this.has_focus(false)
     @div.attr('data-cube-id', @cube_id)
+    @div.attr('tabindex', 0)
 
     renderer.setSize(@div.width(), @div.width())
     @div.append(renderer.domElement);
@@ -25,11 +25,11 @@ class Dom
     top  = @div.width()*y_center-width/2
     @div.append("<div class='mouse_target' data-side='#{side}' style='width:#{width}px; height:#{width}px; left:#{left}px; top:#{top}px;'></div>")
 
-  has_focus: (has_it) ->
-    color = if has_it then 'gray' else '#eee'
-    cursor = if has_it then 'pointer' else 'default'
-    @div.css(border: "2px solid #{color}", cursor: cursor)
-    if has_it then @div.addClass('focus') else @div.removeClass('focus')
+  # has_focus: (has_it) ->
+  #   color = if has_it then 'gray' else '#eee'
+  #   cursor = if has_it then 'pointer' else 'default'
+  #   @div.css(border: "2px solid #{color}", cursor: cursor)
+  #   if has_it then @div.addClass('focus') else @div.removeClass('focus')
 
   alg_changed: (is_playing, at_start, at_end, count_text, alg_texts) ->
     if is_playing
@@ -57,7 +57,7 @@ class Dom
       @alg_future.text(" "+ alg_texts.future)
 
   show_help: ->
-    @help = $("<div/>").addClass('roofpig-help')
+    @help = $("<div/>").addClass('roofpig--help')
     @help.append(
       $("<div>Keyboard shortcuts</div>").css('text-align': 'center', 'font-weight': 'bold'),
       "<div><span>→</span> - Next move</div>",
@@ -79,16 +79,16 @@ class Dom
     was_removed
 
   add_alg_area: (showalg) ->
-    @div.append($("<div/>", text: '?', id: "help-#{@cube_id}").addClass('roofpig-help-button'))
+    @div.append($("<div/>", text: '?', id: "help-#{@cube_id}").addClass('roofpig--help-button'))
 
     @alg_area = $("<div/>").height(@div.height() - @div.width()).width(@div.width()).css("border-top": "1px solid #ccc")
     @div.append(@alg_area)
 
     if showalg
-      @alg_text = $("<div/>").width(@div.width()).addClass("roofpig-algtext")
+      @alg_text = $("<div/>").width(@div.width()).addClass("roofpig--algtext")
       @alg_area.append(@alg_text)
 
-      @alg_past = $("<span/>").addClass("roofpig-past-algtext")
+      @alg_past = $("<span/>").addClass("roofpig--past-algtext")
       @alg_future = $("<span/>")
       @alg_text.append(@alg_past, @alg_future)
 
@@ -117,19 +117,20 @@ class Dom
     button.show()
     if enabled
       button.prop("disabled", false)
-      button.addClass('roofpig-button-enabled')
+      button.addClass('roofpig--button-enabled')
     else
       button.prop("disabled", true)
-      button.removeClass('roofpig-button-enabled')
+      button.removeClass('roofpig--button-enabled')
 
   _make_button: (text, name) ->
     button = $("<button/>", text: text, id: "#{name}-#{@cube_id}")
     @alg_area.append(button)
 
-    button.addClass('roofpig-button')
+    button.addClass('roofpig--button')
     button.css('font-size': 28*@hscale, float: 'left', height: 40*@hscale, width: 76*@scale)
+    button.attr('tabindex', -1)
 
   _make_count_area: ->
-    count_div = $("<div/>", id: "count-#{@cube_id}").addClass('roofpig-count')
+    count_div = $("<div/>", id: "count-#{@cube_id}").addClass('roofpig--count')
     @alg_area.append(count_div)
     count_div.height(40*@hscale).width(80*@scale).css("font-size", 24*@hscale)

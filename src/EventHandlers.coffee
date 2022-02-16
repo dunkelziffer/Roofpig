@@ -3,71 +3,77 @@
 
 #This is all page wide data and functions.
 class EventHandlers
-  @initialized = false
 
-  @set_focus: (new_focus) ->
-    if @_focus != new_focus
-      @dom.has_focus(false) if @_focus
+ 
+  # @initialized = false
 
-      @_focus = new_focus
-      unless @focus().is_null
-        @camera = @_focus.world3d.camera
-        @dom = @_focus.dom
+  # @set_focus: (new_focus) ->
+  #   if @_focus != new_focus
+  #     # @dom.has_focus(false) if @_focus
 
-        @dom.has_focus(true)
+  #     @_focus = new_focus
+  #     unless @focus().is_null
+  #       @camera = @_focus.world3d.camera
+  #       @dom = @_focus.dom
 
-  NO_FOCUS = {
-    add_changer: -> {}
-    is_null: true
-  }
-  @focus: ->
-    @_focus || NO_FOCUS
+  #       # @dom.has_focus(true)
 
-  @initialize: ->
-    return if @initialized
+  # NO_FOCUS = {
+  #   add_changer: -> {}
+  #   is_null: true
+  # }
+  # @focus: ->
+  #   @_focus || NO_FOCUS
+
+  @initialize: (roofpig_div, cube_animation) ->
+    # return if @initialized
 
     @down_keys = {}
 
-    $('body').keydown (e) -> EventHandlers.key_down(e)
-    $('body').keyup   (e) -> EventHandlers.key_up(e)
+    roofpig_div.keydown (e) -> 
+      console.log(e)
+      EventHandlers.key_down(e, cube_animation)
+    roofpig_div.keyup   (e) -> EventHandlers.key_up(e)
 
-    $(document).on('mousedown', '.roofpig', (e) -> EventHandlers.mouse_down(e, $(this).data('cube-id')))
-    $('body').mousemove  (e) -> EventHandlers.mouse_move(e)
-    $('body').mouseup    (e) -> EventHandlers.mouse_end(e)
-    $('body').mouseleave (e) -> EventHandlers.mouse_end(e)
+    # $(document).on('mousedown', '.roofpig', (e) -> EventHandlers.mouse_down(e, $(this).data('cube-id')))
+    roofpig_div.mousemove  (e) -> EventHandlers.mouse_move(e)
+    roofpig_div.mouseup    (e) -> EventHandlers.mouse_end(e)
+    roofpig_div.mouseleave (e) -> EventHandlers.mouse_end(e)
 
-    $(document).on('click', '.roofpig', (e) ->
-      cube = CubeAnimation.by_id[$(this).data('cube-id')]
-      EventHandlers.set_focus(cube)
-    )
-    $(document).on('click', '.focus .mouse_target', (e) ->
+    console.log(roofpig_div, $('body'))
+
+    # $(document).on('click', '.roofpig', (e) ->
+    #   cube = CubeAnimation.by_id[$(this).data('cube-id')]
+    #   # EventHandlers.set_focus(cube)
+    # )
+    roofpig_div.on('click', '.focus .mouse_target', (e) ->
       EventHandlers.left_cube_click(e, $(this).data('side'))
     )
-    $(document).on('contextmenu', '.focus .mouse_target', (e) ->
+    roofpig_div.on('contextmenu', '.focus .mouse_target', (e) ->
       EventHandlers.right_cube_click(e, $(this).data('side'))
     )
-    $(document).on('click', '.roofpig button', (e) ->
+    roofpig_div.on('click', '.roofpig button', (e) ->
       [button_name, cube_id] = $(this).attr('id').split('-')
       CubeAnimation.by_id[cube_id].button_click(button_name, e.shiftKey)
     )
-    $(document).on('click', '.roofpig-help-button', (e) ->
+    roofpig_div.on('click', '.roofpig--help-button', (e) ->
       [_, cube_id] = $(this).attr('id').split('-')
       CubeAnimation.by_id[cube_id].dom.show_help()
     )
 
-    @initialized = true
+    # @initialized = true
 
   @mouse_down: (e, clicked_cube_id) ->
     @dom.remove_help()
     
-    if clicked_cube_id == @focus().id
-      @bend_start_x = e.pageX
-      @bend_start_y = e.pageY
+    # if clicked_cube_id == @focus().id
+    @bend_start_x = e.pageX
+    @bend_start_y = e.pageY
 
-      @bending = true
+    @bending = true
 
   @mouse_end: (e) ->
-    @focus().add_changer('camera', new OneChange( => @camera.bend(0, 0)))
+    # @focus().add_changer('camera', new OneChange( => @camera.bend(0, 0)))
     @bending = false
 
   @mouse_move: (e) ->
@@ -76,7 +82,7 @@ class EventHandlers
       dy = -0.02 * (e.pageY - @bend_start_y) / @dom.scale
       if e.shiftKey
         dy = 0
-      @focus().add_changer('camera', new OneChange( => @camera.bend(dx, dy)))
+      # @focus().add_changer('camera', new OneChange( => @camera.bend(dx, dy)))
 
   @left_cube_click: (e, click_side) ->
     this._handle_cube_click(e, click_side)
@@ -86,7 +92,7 @@ class EventHandlers
     e.preventDefault() # no context menu
 
   @_handle_cube_click: (e, click_side) ->
-    return false unless @focus().user_controlled()
+    # return false unless @focus().user_controlled()
 
     third_key = e.metaKey || e.ctrlKey
     opposite = false
@@ -100,7 +106,7 @@ class EventHandlers
         opposite = third_key
         if third_key then {F: 'b', U: 'd', R: 'l'} else {F: 'f', U: 'u', R: 'r'}
 
-    @focus().external_move(side_map[click_side]+this._turns(e, opposite))
+    # this.external_move(side_map[click_side]+this._turns(e, opposite))
 
 
   @_turns: (e, opposite = false) ->
@@ -110,12 +116,12 @@ class EventHandlers
 
 # ---- Keyboard Events ----
 
-  @key_down: (e) ->
+  @key_down: (e, cube_animation) ->
     @down_keys[e.keyCode] = true
 
-    return if @focus().is_null
+    # return if @focus().is_null
 
-    help_toggled = @dom.remove_help()
+    # help_toggled = @dom.remove_help()
 
     if this.cube_key_moves(e)
       return true
@@ -125,18 +131,19 @@ class EventHandlers
 
     [key, shift] = [e.keyCode, e.shiftKey]
 
-    if key == key_tab
-      new_focus = if shift then @focus().previous_cube() else @focus().next_cube()
-      this.set_focus(new_focus)
+    # if key == key_tab
+    #   new_focus = if shift then @focus().previous_cube() else @focus().next_cube()
+    #   this.set_focus(new_focus)
 
-    else if key == key_end || (key == key_right_arrow && shift)
-      @focus().add_changer('pieces', new OneChange( => @focus().alg.to_end(@focus().world3d)))
+    if key == key_end || (key == key_right_arrow && shift)
+      cube_animation.add_changer('pieces', new OneChange( => @focus().alg.to_end(@focus().world3d)))
 
     else if key in button_keys
-      this._fake_click_down(this._button_for(key, shift))
+      this._button_for(key, shift, cube_animation)
+      # this._fake_click_down(this._button_for(key, shift, cube_animation))
 
     else if key == key_questionmark
-      @focus().dom.show_help() unless help_toggled
+      # this.dom.show_help() unless help_toggled
 
     else
       unhandled = true
@@ -147,7 +154,7 @@ class EventHandlers
 
 
   @cube_key_moves: (e) ->
-    return false unless @focus().user_controlled()
+    # return false unless @focus().user_controlled()
 
     number_key = Math.max(key_num.indexOf(e.keyCode), key_numpad.indexOf(e.keyCode))
     return false unless number_key > 0
@@ -186,21 +193,21 @@ class EventHandlers
         when 'U' then moves.push("D"+anti_turn_code)
         when 'R' then moves.push("L"+anti_turn_code)
 
-    @focus().external_move(moves.join('+'))
+    # @focus().external_move(moves.join('+'))
 
     true
 
 
-  @_button_for: (key, shift) ->
+  @_button_for: (key, shift, cube_animation) ->
     switch key
       when key_home
-        @dom.reset
+        cube_animation.reset
       when key_left_arrow
-        unless shift then @dom.prev else @dom.reset
+        unless shift then cube_animation.prev else cube_animation.reset
       when key_right_arrow
-       @dom.next
+        cube_animation.next
       when key_space
-        @dom.play_or_pause
+        cube_animation.play_or_pause
 
   @key_up: (e) ->
     @down_keys[e.keyCode] = false
@@ -212,15 +219,15 @@ class EventHandlers
         @down_button = null
     return button_key
 
-  @_fake_click_down: (button) ->
-    unless button.attr("disabled")
-      @down_button = button
-      button.addClass('roofpig-button-fake-active')
+  # @_fake_click_down: (button) ->
+  #   unless button.attr("disabled")
+  #     @down_button = button
+  #     button.addClass('roofpig--button-fake-active')
 
-  @_fake_click_up: (button) ->
-    unless button.attr("disabled")
-      button.removeClass('roofpig-button-fake-active')
-      button.click()
+  # @_fake_click_up: (button) ->
+  #   unless button.attr("disabled")
+  #     button.removeClass('roofpig--button-fake-active')
+  #     button.click()
 
 
   # http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes

@@ -72,13 +72,13 @@ class CubeAnimation
       if (@config.setup) then new Alg(@config.setup, @world3d).to_end()
       @alg.mix() unless @config.flag('startsolved')
 
-      if CubeAnimation.count() == 1
-        EventHandlers.set_focus(this)
+      # if CubeAnimation.count() == 1
+      #   EventHandlers.set_focus(this)
 
       @changers = {}
       this.animate(true)
 
-      EventHandlers.initialize()
+      EventHandlers.initialize(roofpig_div, this)
     catch e
       roofpig_div.html(e.message)
       roofpig_div.css(background: '#f66')
@@ -99,9 +99,9 @@ class CubeAnimation
     @now_solving = true
 
   remove: ->
-    if this == EventHandlers.focus()
-      new_focus = (if this == this.next_cube() then null else this.next_cube())
-      EventHandlers.set_focus(new_focus)
+    # if this == EventHandlers.focus()
+    #   new_focus = (if this == this.next_cube() then null else this.next_cube())
+    #   EventHandlers.set_focus(new_focus)
     delete CubeAnimation.by_id[@id]
     @dom.div.remove()
 

@@ -7,7 +7,21 @@ class Css
   @CODE =
   """
 <style>
-.roofpig-button {
+
+.roofpig {
+  position: relative;
+  font-family: Lucida Sans Unicode, Lucida Grande, sans-serif;
+  cursor: default;
+  border: 2px solid #eee;
+}
+
+.roofpig:focus {
+  cursor: pointer;
+  border: 2px solid grey;
+  outline: none;
+}
+
+.roofpig--button {
   font-family: Lucida Sans Unicode, Lucida Grande, sans-serif;
   font-weight: normal;
   font-style: normal;
@@ -23,22 +37,22 @@ class Css
   text-align: center;
   text-shadow: 1px 1px 0 #{shadow};
 }
-.roofpig-button-enabled {
+.roofpig--button-enabled {
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #{light}), color-stop(1, #{dark}));
   background: -moz-linear-gradient(center top, #{light} 5%, #{dark} 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{light}', endColorstr='#{dark}');
 }
-.roofpig-button-enabled:hover {
+.roofpig--button-enabled:hover {
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #{dark}), color-stop(1, #{light}));
   background: -moz-linear-gradient(center top, #{dark} 5%, #{light} 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{dark}', endColorstr='#{light}');
 }
-.roofpig-button-enabled:active, .roofpig-button-fake-active {
+.roofpig--button-enabled:active, .roofpig--button-fake-active {
   position: relative;
   top: 2px;
 }
 
-.roofpig-count {
+.roofpig--count {
   font-weight: normal;
   font-style: normal;
   color: black;
@@ -46,18 +60,18 @@ class Css
   float: right;
 }
 
-.roofpig-algtext {
+.roofpig--algtext {
   background-color: #eee;
   margin-bottom: 2px;
   font-weight: normal;
   font-style: normal;
   color: black;
 }
-.roofpig-past-algtext {
-  background-color: #ff9;
+.roofpig--past-algtext {
+  background-color: #f90;
 }
 
-.roofpig-help-button {
+.roofpig--help-button {
   font-size: 14px;
   height: 20px;
   width: 20px;
@@ -69,15 +83,15 @@ class Css
   text-align: center;
   border-radius: 8px;
 }
-.roofpig-help-button:hover {
+.roofpig--help-button:hover {
   color: black;
   background-color: rgba(220, 220, 220, 0.7);
 }
-.roofpig-help-button:active {
+.roofpig--help-button:active {
   background-color: #aaa;
 }
 
-.roofpig-help {
+.roofpig--help {
   position: absolute;
   top: -1px;
   white-space: nowrap;
@@ -92,10 +106,10 @@ class Css
   border: 1px solid #aaa;
   padding: 0 4px 4px 4px;
 }
-.roofpig-help div {
+.roofpig--help div {
   margin: 2px 0;
 }
-.roofpig-help span {
+.roofpig--help span {
   font-size: 11px;
   padding: 0 2px;
   background-color: #ddd;
@@ -103,7 +117,7 @@ class Css
 .mouse_target {
   position: absolute;
 }
-.focus .mouse_target {
+.roofpig:focus .mouse_target {
   cursor: move;
 }
 </style>
