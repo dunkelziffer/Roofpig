@@ -78,7 +78,7 @@ class CubeAnimation
       @changers = {}
       this.animate(true)
 
-      EventHandlers.initialize(roofpig_div, this)
+      EventHandlers.initialize(roofpig_div, @dom, this)
     catch e
       roofpig_div.html(e.message)
       roofpig_div.css(background: '#f66')
@@ -136,6 +136,7 @@ class CubeAnimation
 
 
   button_click: (name, shift) ->
+    console.log(name, shift, this)
     switch name
       when 'play'
         changer = unless shift then @alg.play(@world3d) else new OneChange( => @alg.to_end(@world3d))

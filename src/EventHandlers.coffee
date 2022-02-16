@@ -25,14 +25,14 @@ class EventHandlers
   # @focus: ->
   #   @_focus || NO_FOCUS
 
-  @initialize: (roofpig_div, cube_animation) ->
+  @initialize: (roofpig_div, dom, cube_animation) ->
     # return if @initialized
 
     @down_keys = {}
 
     roofpig_div.keydown (e) -> 
-      console.log(e)
-      EventHandlers.key_down(e, cube_animation)
+      # console.log(e, dom)
+      EventHandlers.key_down(e, dom, cube_animation)
     roofpig_div.keyup   (e) -> EventHandlers.key_up(e)
 
     # $(document).on('mousedown', '.roofpig', (e) -> EventHandlers.mouse_down(e, $(this).data('cube-id')))
@@ -54,11 +54,11 @@ class EventHandlers
     )
     roofpig_div.on('click', '.roofpig button', (e) ->
       [button_name, cube_id] = $(this).attr('id').split('-')
-      CubeAnimation.by_id[cube_id].button_click(button_name, e.shiftKey)
+      cube_animation.button_click(button_name, e.shiftKey)
     )
     roofpig_div.on('click', '.roofpig--help-button', (e) ->
       [_, cube_id] = $(this).attr('id').split('-')
-      CubeAnimation.by_id[cube_id].dom.show_help()
+      cube_animation.dom.show_help()
     )
 
     # @initialized = true
@@ -116,7 +116,7 @@ class EventHandlers
 
 # ---- Keyboard Events ----
 
-  @key_down: (e, cube_animation) ->
+  @key_down: (e, dom, cube_animation) ->
     @down_keys[e.keyCode] = true
 
     # return if @focus().is_null
@@ -136,14 +136,16 @@ class EventHandlers
     #   this.set_focus(new_focus)
 
     if key == key_end || (key == key_right_arrow && shift)
-      cube_animation.add_changer('pieces', new OneChange( => @focus().alg.to_end(@focus().world3d)))
+      dom.add_changer('pieces', new OneChange( => @focus().alg.to_end(@focus().world3d)))
 
     else if key in button_keys
-      this._button_for(key, shift, cube_animation)
-      # this._fake_click_down(this._button_for(key, shift, cube_animation))
+      console.log(this, key, shift, dom, this._button_for(key, shift, dom))
+      this._button_for(key, shift, dom).click()
+      cube_animation.button_click(this._button_name_for(key, shift, dom), shift)
+      # this._fake_click_down(this._button_for(key, shift, dom))
 
     else if key == key_questionmark
-      # this.dom.show_help() unless help_toggled
+      dom.show_help() unless help_toggled
 
     else
       unhandled = true
@@ -198,16 +200,27 @@ class EventHandlers
     true
 
 
-  @_button_for: (key, shift, cube_animation) ->
+  @_button_for: (key, shift, dom) ->
     switch key
       when key_home
-        cube_animation.reset
+        dom.reset
       when key_left_arrow
-        unless shift then cube_animation.prev else cube_animation.reset
+        unless shift then dom.prev else dom.reset
       when key_right_arrow
-        cube_animation.next
+        dom.next
       when key_space
-        cube_animation.play_or_pause
+        dom.play_or_pause
+
+  @_button_name_for: (key, shift, dom) ->
+    switch key
+      when key_home
+        'reset'
+      when key_left_arrow
+        unless shift then 'prev' else 'reset'
+      when key_right_arrow
+        'next'
+      when key_space
+        'play_or_pause'
 
   @key_up: (e) ->
     @down_keys[e.keyCode] = false
