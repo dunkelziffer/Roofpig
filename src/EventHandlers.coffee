@@ -117,13 +117,14 @@ class EventHandlers
 
     help_toggled = @dom.remove_help()
 
-    if this.cube_key_moves(e)
-      return true
-
     if e.ctrlKey || e.metaKey || e.altKey
       return true
 
     [key, shift] = [e.keyCode, e.shiftKey]
+
+    if (key in turn_keys) && @focus().user_controlled()
+      this.cube_key_moves(e)
+      return true
 
     if key == key_tab
       new_focus = if shift then @focus().previous_cube() else @focus().next_cube()
@@ -147,59 +148,68 @@ class EventHandlers
 
 
   @cube_key_moves: (e) ->
-    return false unless @focus().user_controlled()
+    sides = {}
+    sides[turn_B] = 'B'
+    sides[turn_R] = 'R'
+    sides[turn_D] = 'D'
+    sides[turn_F] = 'F'
+    sides[turn_L] = 'L'
+    sides[turn_U] = 'U'
 
-    number_key = Math.max(key_num.indexOf(e.keyCode), key_numpad.indexOf(e.keyCode))
-    return false unless number_key > 0
+    side = sides[e.keyCode]
+    turns = (if this._is_down(double_turn) then 2 else 1) * (if this._is_down(reverse_turn) then -1 else 1)
 
-    side = switch number_key
-      when 1, 4, 7 then "F"
-      when 2, 5, 8 then "U"
-      when 3, 6, 9 then "R"
-
-    turns = switch number_key
-      when 1, 2, 3 then 2
-      when 4, 5, 6 then 1
-      when 7, 8, 9 then -1
-
-    turn_code      = Move.turn_code(turns)
-    anti_turn_code = Move.turn_code(-turns)
-
-    opposite = @down_keys[key_Z]
-    middle   = @down_keys[key_X]
-    the_side = @down_keys[key_C] || (!opposite && !middle)
+    opposite = this._is_down(opposite_turn) || this._is_down(cube_rotation)
+    middle   = this._is_down(slice_turn) || this._is_down(wide_turn) || this._is_down(cube_rotation)
+    the_side = this._is_down(regular_turn) || this._is_down(wide_turn) || this._is_down(cube_rotation) || (!opposite && !middle) 
 
     moves = []
 
-    if the_side
-      moves.push("#{side}#{turn_code}")
+    if the_side && middle && opposite
+      rotation_turn_code = Move.turn_code(turns, true)
+      moves.push("#{side}#{rotation_turn_code}")
 
-    if middle
-      switch side
-        when 'F' then moves.push("S"+turn_code)
-        when 'U' then moves.push("E"+anti_turn_code)
-        when 'R' then moves.push("M"+anti_turn_code)
+    else
+      turn_code      = Move.turn_code(turns)
+      anti_turn_code = Move.turn_code(-turns)
 
-    if opposite
-      switch side
-        when 'F' then moves.push("B"+anti_turn_code)
-        when 'U' then moves.push("D"+anti_turn_code)
-        when 'R' then moves.push("L"+anti_turn_code)
+      if the_side
+        moves.push("#{side}#{turn_code}")
+
+      if middle
+        switch side
+          when 'B' then moves.push("S"+anti_turn_code)
+          when 'R' then moves.push("M"+anti_turn_code)
+          when 'D' then moves.push("E"+turn_code)
+          when 'F' then moves.push("S"+turn_code)
+          when 'L' then moves.push("M"+turn_code)
+          when 'U' then moves.push("E"+anti_turn_code)
+
+      if opposite
+        switch side
+          when 'B' then moves.push("F"+anti_turn_code)
+          when 'R' then moves.push("L"+anti_turn_code)
+          when 'D' then moves.push("U"+anti_turn_code)
+          when 'F' then moves.push("B"+anti_turn_code)
+          when 'L' then moves.push("R"+anti_turn_code)
+          when 'U' then moves.push("D"+anti_turn_code)
 
     @focus().external_move(moves.join('+'))
 
-    true
 
+  @_is_down: (logicalKeyCode) ->
+    return false if logicalKeyCode == null
+    return @down_keys[logicalKeyCode] == true
 
   @_button_for: (key, shift) ->
     switch key
-      when key_home
+      when menu_reset
         @dom.reset
-      when key_left_arrow
+      when menu_prev
         unless shift then @dom.prev else @dom.reset
-      when key_right_arrow
+      when menu_next
        @dom.next
-      when key_space
+      when menu_play
         @dom.play_or_pause
 
   @key_up: (e) ->
@@ -223,28 +233,79 @@ class EventHandlers
       button.click()
 
 
-  # http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+  # Declare keycodes for physical keys
+  # (http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes)
   key_tab = 9
   key_space = 32
   key_end = 35
   key_home = 36
+
   key_left_arrow = 37
   key_up_arrow = 38
   key_right_arrow = 39
   key_down_arrow = 40
+
   key_A = 65
   key_C = 67
   key_D = 68
+  key_F = 70
   key_J = 74
   key_K = 75
   key_L = 76
   key_S = 83
+  key_V = 86
   key_X = 88
   key_Z = 90
+
+  numpad_0 = 96
+  numpad_1 = 97
+  numpad_2 = 98
+  numpad_3 = 99
+  numpad_4 = 100
+  numpad_5 = 101
+  numpad_6 = 102
+  numpad_7 = 103
+  numpad_8 = 104
+  numpad_9 = 105
+  numpad_decimal = 110
+
   key_questionmark = 191
 
-  key_num = [48, 49, 50, 51, 52 ,53 ,54 ,55, 56, 57]
-  key_numpad = [96, 97, 98, 99, 100, 101, 102, 103, 104, 105]
 
-  button_keys = [key_space, key_home, key_left_arrow, key_right_arrow]
+  # Map physical keys to logical actions
+  # TODO: extract into a config option
 
+  # face turns
+  turn_B = numpad_9
+  turn_R = numpad_6
+  turn_D = numpad_0
+  turn_F = numpad_5
+  turn_L = numpad_4
+  turn_U = numpad_8
+
+  # individual layer modifiers
+  regular_turn = null
+  slice_turn = key_S
+  opposite_turn = null
+
+  # composite layer modifiers
+  wide_turn = null              # regular + slice
+  cube_rotation = key_D         # regular + slice + opposite
+
+  # turn modifiers
+  reverse_turn = key_F
+  double_turn = key_V
+
+  # menu buttons
+  menu_reset = numpad_decimal
+  menu_prev = numpad_1
+  menu_next = numpad_2
+  menu_play = numpad_3
+
+
+  # keybindings will be deactivated automatically, if you assign `null` to them in the mapping above
+  compact = (array) ->
+    item for item in array when item != null
+
+  button_keys = compact([menu_reset, menu_prev, menu_next, menu_play])
+  turn_keys   = compact([turn_B, turn_R, turn_D, turn_F, turn_L, turn_U])
